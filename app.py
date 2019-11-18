@@ -7,7 +7,7 @@ import requests
 
 from secrets import api_auth_token, jwt_secret_key
 from utils import parse_date_time
-import business
+from business import get_user_by_email
 
 app = Flask(__name__)
 
@@ -19,12 +19,18 @@ def decode_auth_token(auth_token):
 
 
 def encode_auth_token(user_id, name, email, scopes):
-    # use jwt, jwt_secret_key
-    # use the following payload:
-    # { 'sub': user_id, 'name': name, 'email': email, 'scope': scopes, 'exp': mktime((datetime.now() + timedelta(days=1)).timetuple()) }
+    # use jwt and jwt_secret_key imported above, and the payload defined below
     # should be a one liner, but we want you to see how JWTs work
-    # remember to convert the token to string, use .decode("utf-8") rather than str() for this
-    return jwt.encode(payload={ 'sub': user_id, 'name': name, 'email': email, 'scope': scopes, 'exp': mktime((datetime.datetime.now() + datetime.timedelta(days=1)).timetuple())}, key=jwt_secret_key).decode("utf-8")
+    # remember to convert the result of jwt.encode to a string
+    # make sure to use .decode("utf-8") rather than str() for this
+    payload = {
+        'sub': user_id,
+        'name': name,
+        'email': email,
+        'scope': scopes,
+        'exp': mktime((datetime.datetime.now() + datetime.timedelta(days=1)).timetuple())
+    }
+    return jwt.encode(payload=payload, key=jwt_secret_key).decode("utf-8")
 
 
 def get_user_from_token():
@@ -57,7 +63,7 @@ def user():
 @app.route('/login', methods=['POST'])
 def login():
     # use use flask.request to get the json body and get the email and scopes property
-    # use the business.login function to get the user data
+    # use the get_user_by_email function to get the user data
     # return a the encoded json web token as a token property on the json response as in the format below
     # we're not actually validitating a password or anything because that would add unneeded complexity
     if request.content_type != 'application/json' or not str(request.json):
@@ -66,7 +72,7 @@ def login():
         return 'email parameter is required', 400
     email = request.json.get('email')
     scopes = request.json.get('scopes')
-    user = business.login(email)
+    user = get_user_by_email(email)
     return {
         'token': encode_auth_token(user_id=user['id'], name=user['name'], email=user['email'], scopes=scopes)
     }
