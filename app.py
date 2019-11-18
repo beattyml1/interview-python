@@ -20,8 +20,7 @@ def decode_auth_token(auth_token):
 
 
 def encode_auth_token(user_id, name, email, scopes, type, client=None):
-    # use jwt, jwt_secret_key
-    # use the following payload:
+    # use jwt and jwt_secret_key imported above, and the payload defined below
     # should be a one liner, but we want you to see how JWTs work
     # remember to convert the result of jwt.encode to a string
     # make sure to use .decode("utf-8") rather than str() for this
