@@ -1,5 +1,6 @@
 import datetime
 from time import mktime
+from uuid import uuid4
 
 from flask import Flask, request
 import jwt
@@ -18,17 +19,22 @@ def decode_auth_token(auth_token):
     return jwt.decode(auth_token, key=jwt_secret_key)
 
 
-def encode_auth_token(user_id, name, email, scopes):
+def encode_auth_token(user_id, name, email, scopes, type, client=None):
     # use jwt and jwt_secret_key imported above, and the payload defined below
     # should be a one liner, but we want you to see how JWTs work
     # remember to convert the result of jwt.encode to a string
     # make sure to use .decode("utf-8") rather than str() for this
     payload = {
+        'jti': str(uuid4()),
         'sub': user_id,
         'name': name,
         'email': email,
         'scope': scopes,
-        'exp': mktime((datetime.datetime.now() + datetime.timedelta(days=1)).timetuple())
+        'exp': mktime((datetime.datetime.now() + datetime.timedelta(days=1)).timetuple()),
+        'aud': None,
+        'iss': None,
+        'azp': str(client),
+        'typ': type,
     }
     return jwt.encode(payload=payload, key=jwt_secret_key).decode("utf-8")
 
